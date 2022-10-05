@@ -44,5 +44,7 @@ namespace ConsoleApp
 
         public string unEntier; //La conversion d'un nombre en string est automatique
         public string reponse; //La conversion d'un bool en string est automatique
+
+        public string xxx;
     }
 }

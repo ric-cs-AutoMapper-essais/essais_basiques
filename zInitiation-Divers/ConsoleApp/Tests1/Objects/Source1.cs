@@ -42,5 +42,7 @@ namespace ConsoleApp
         public int unEntier;
         public bool reponse;
 
+        public int xxx;
+
     }
 }

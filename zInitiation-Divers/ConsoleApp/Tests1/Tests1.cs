@@ -53,7 +53,9 @@ namespace ConsoleApp
                 poids = 51,
 
                 unEntier = 66,
-                reponse = true
+                reponse = true,
+
+                xxx = 10 //Ko
             };
 
 
@@ -106,7 +108,9 @@ namespace ConsoleApp
         private static IMapper _getAutoMapper<TSource, TDesti>()
         {
             MapperConfiguration oMapperConfig = new MapperConfiguration(
-                (IMapperConfigurationExpression poConfig) => poConfig.CreateMap<TSource, TDesti>()
+                (IMapperConfigurationExpression poConfig) => {
+                    poConfig.CreateMap<TSource, TDesti>();
+                }
             );
             IMapper oMapper = oMapperConfig.CreateMapper();
 
@@ -143,7 +147,6 @@ namespace ConsoleApp
                      .ForMember(poDesti => poDesti.hour, opt => opt.MapFrom(poSource => poSource.dateTime.Hour))
                      .ForMember(poDesti => poDesti.minutes, opt => opt.MapFrom(poSource => poSource.dateTime.Minute))
                      .ForMember(poDesti => poDesti.seconds, opt => opt.MapFrom(poSource => poSource.dateTime.Second))
-                     .ForMember(poDesti => poDesti.seconds, opt => opt.MapFrom(poSource => poSource.dateTime.Second))
 
                       //.ForMember(poDesti => poDesti.ValeurDeTypeAConvertir, opt => opt.MapFrom(poSource => Int32.Parse(poSource.ValeurDeTypeAConvertir)))
 
@@ -157,10 +160,11 @@ namespace ConsoleApp
 
                     .ForMember(poDesti => poDesti.poids, opt => opt.ConvertUsing(new KilogrammesVersGrammesAsStringConverter()))  //Utilisation d'un IValueConverter (le membre source sera celui matchant par le nom à "poids")
                     //.ForMember(poDesti => poDesti.poids, opt => opt.MapFrom(poSource => $"{1000 * poSource.poids}g"))  //Résultat équivalant à ci-dessus
-
+					
+					.ForMember(poDesti => poDesti.xxx, opt => opt.MapFrom(poSource => $"{1024 * poSource.xxx}octets"))
 
                     //.ForMember(poDesti => poDesti.poids, opt => opt.ConvertUsing(new KilogrammesVersGrammesAsStringConverter(), poSource => poSource.autreValeur))  //Utilisation d'un IValueConverter,
-                    //en précisant le mebre source cette fois
+                    //en précisant le membre source cette fois
                     //.ForMember(poDesti => poDesti.poids, opt => opt.MapFrom(poSource => $"{1000 * poSource.autreValeur}g"))  //Résultat équivalant à juste ci-dessus
                     ;
 
@@ -179,9 +183,9 @@ namespace ConsoleApp
 
 
                     poConfig.ValueTransformers.Add<string>(psDestiString => $"oé{psDestiString}éo"); //Applique cette transformation SUPPLEMENTAIRE à tout champ desti de type string ciblé,
-                                                                                                     //MAIS l'applique AVANT la première éventuelle conversion (différente de ValueTransformers.Add).
+                                                                                                     //MAIS l'applique APRES les autres éventuelles conversions (différentes de ValueTransformers.Add).
                     poConfig.ValueTransformers.Add<string>(psDestiString => $"'{psDestiString}'");//Applique cette transformation SUPPLEMENTAIRE à tout champ desti de type string ciblé,
-                                                                                                  //MAIS l'applique AVANT la première éventuelle conversion (différente de ValueTransformers.Add).
+                                                                                                  //MAIS l'applique APRES les autres éventuelles conversions (différentes de ValueTransformers.Add).
 
 
 
@@ -210,7 +214,17 @@ namespace ConsoleApp
         private static IMapper _getAutoMapper3()
         {
             MapperConfiguration oMapperConfig = new MapperConfiguration(
-                (IMapperConfigurationExpression poConfig) => poConfig.AddProfile<MyConversionSource1Desti1Profile>()
+                (IMapperConfigurationExpression poConfig) => {
+                    poConfig.AddProfile<MyConversionSource1Desti1Profile>();
+
+                    //POINT IMPORTANT : les règles de conversion ci-dessous ne seront PAS prises en considération,
+                    // du fait d'avoir un AddProfile ci-dessus !! Ce dernier est donc le seul à pouvoir définir
+                    // les règles lorsqu'on l'utilise !
+                    poConfig.CreateMap<Source1, Desti1>()
+                        .ForMember(poDesti => poDesti.oneFloat, opt => opt.MapFrom(poSource => 10 * poSource.oneFloat))
+                        .ForMember(poDesti => poDesti.oneDouble1, opt => opt.MapFrom(poSource => 100 * poSource.oneFloat))
+                    ;
+                }
             );
             IMapper oMapper = oMapperConfig.CreateMapper();
 
