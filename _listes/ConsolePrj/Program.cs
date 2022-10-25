@@ -6,6 +6,8 @@ using Transverse.Common.DebugTools;
 
 namespace ConsolePrj
 {
+
+    //*************** >>>>>>>>> ATTENTION : toujours mettre en public property { get; set; } les membres intervenant dans la conversion <<<<<<<<<<< **********
     class Entite
     {
         public int Id { get; set; }
